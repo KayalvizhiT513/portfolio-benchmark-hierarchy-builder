@@ -68,3 +68,65 @@
 .assign-list label{display:flex;align-items:center;gap:6px;font-size:10px;padding:5px 0}
 .assign-list label code{margin-left:auto;color:#8aa0b5;font-size:9px}
 @media(max-width:780px){.retention-note,.level-strip{flex-direction:column;align-items:flex-start;gap:10px}.retention-note button{white-space:normal}}
+
+/* Graph-first workspace: focus the editing canvas, not a three-column dashboard */
+.content{max-width:none;padding:22px 24px 14px}
+.heading{margin-bottom:14px}
+.heading h1{font-size:25px}
+.heading p{margin-top:4px}
+.options{margin-bottom:10px;padding:11px 17px}
+.mode-note{padding:9px 13px;margin-bottom:10px}
+.retention-note{padding:8px 12px;margin-bottom:9px}
+.level-strip{padding:8px 12px;margin-bottom:9px}
+.workspace.graph-first{display:grid;grid-template-columns:280px minmax(0,1fr) 340px;gap:10px;min-height:clamp(550px,70vh,1050px);height:clamp(550px,70vh,1050px);align-items:stretch;position:relative}
+.workspace.graph-first.left-collapsed{grid-template-columns:52px minmax(0,1fr) 340px}
+.workspace.graph-first.right-collapsed{grid-template-columns:280px minmax(0,1fr) 52px}
+.workspace.graph-first.left-collapsed.right-collapsed{grid-template-columns:52px minmax(0,1fr) 52px}
+.workspace.graph-first.graph-maximized{grid-template-columns:0 minmax(0,1fr) 0;gap:0}
+.graph-first .panel{min-height:0;height:100%;min-width:0}
+.graph-first .canvas{display:flex;min-width:0;min-height:0;height:100%;grid-column:auto;overflow:hidden}
+.graph-first .diagram-scroll{flex:1;height:0;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;padding:48px 44px 70px}
+.graph-first .tree-head{flex-shrink:0}
+.graph-first .legend{flex-shrink:0}
+.graph-first .drawer-body{height:100%;overflow:auto;min-width:0}
+.graph-first .panel-content{min-width:0}
+.graph-first .left,.graph-first .inspector{position:relative}
+.graph-first .panel-drawer-tab{display:none}
+.graph-first.left-collapsed .left,.graph-first.right-collapsed .inspector{overflow:hidden}
+.graph-first.left-collapsed .left .drawer-body,.graph-first.right-collapsed .inspector .drawer-body{display:none}
+.graph-first.left-collapsed .left .panel-drawer-tab,.graph-first.right-collapsed .inspector .panel-drawer-tab{height:100%;width:100%;display:flex;flex-direction:column;gap:15px;align-items:center;justify-content:flex-start;padding:15px 0;border:0;background:#fff;color:#4d78b7;cursor:pointer}
+.graph-first .panel-drawer-tab span{writing-mode:vertical-rl;text-orientation:mixed;font-size:10px;font-weight:800;letter-spacing:.5px}
+.graph-first:not(.left-collapsed) .left .panel-drawer-tab,.graph-first:not(.right-collapsed) .inspector .panel-drawer-tab{position:absolute;display:flex;z-index:5;top:13px;right:9px;width:27px;height:27px;border:1px solid #e2e9f2;border-radius:6px;background:#fff;color:#5c80af;align-items:center;justify-content:center;gap:0}
+.graph-first:not(.left-collapsed) .left .panel-drawer-tab span,.graph-first:not(.right-collapsed) .inspector .panel-drawer-tab span{display:none}
+.graph-first:not(.left-collapsed) .left .panel-drawer-tab svg:first-child,.graph-first:not(.right-collapsed) .inspector .panel-drawer-tab svg:first-child{display:none}
+.graph-first.graph-maximized>.left,.graph-first.graph-maximized>.inspector{visibility:hidden;pointer-events:none}
+.graph-first .canvas .panel-title{padding:0 18px}
+.graph-first .canvas-tools{gap:12px}
+.graph-first .canvas-tools button{border:1px solid #e2e8f1;background:#fff;border-radius:6px;color:#5e7fa8;padding:6px;display:grid;place-items:center}
+.graph-first .diagram-stage{min-height:100%;min-width:max-content}
+.bottom-drawer{margin-top:10px}
+.bottom-drawer.collapsed{height:50px;min-height:50px;overflow:hidden}
+.bottom-drawer.collapsed .bottom-content{display:none}
+.bottom-drawer.open .bottom-content{display:block}
+.bottom-drawer .drawer-toggle{display:flex;align-items:center;gap:6px;color:#547cb4;border:1px solid #e4eaf3;border-radius:6px;height:31px;padding:0 10px;font-size:11px;font-weight:800}
+.bottom-drawer .table-tabs{height:50px}
+.bottom-drawer.open .table-overflow{max-height:45vh}
+@media(max-width:1200px){
+ .workspace.graph-first,.workspace.graph-first.left-collapsed,.workspace.graph-first.right-collapsed,.workspace.graph-first.left-collapsed.right-collapsed{grid-template-columns:52px minmax(0,1fr) 52px;height:clamp(550px,72vh,1000px)}
+ .workspace.graph-first:not(.left-collapsed) .left,.workspace.graph-first:not(.right-collapsed) .inspector{position:absolute;top:0;bottom:0;z-index:9;width:min(330px,80vw);box-shadow:0 15px 35px #19375a26}
+ .workspace.graph-first:not(.left-collapsed) .left{left:0}
+ .workspace.graph-first:not(.right-collapsed) .inspector{right:0}
+ .workspace.graph-first.left-collapsed .left,.workspace.graph-first.right-collapsed .inspector{position:relative;grid-column:auto}
+}
+@media(max-width:760px){
+ .content{padding:15px 9px}
+ .workspace.graph-first,.workspace.graph-first.left-collapsed,.workspace.graph-first.right-collapsed,.workspace.graph-first.left-collapsed.right-collapsed{grid-template-columns:39px minmax(0,1fr) 39px;height:calc(100dvh - 250px);min-height:430px}
+ .graph-first .diagram-scroll{padding:28px 15px 45px}
+ .graph-first .canvas .panel-title{padding:0 9px}
+ .graph-first .canvas-tools{gap:3px}
+ .graph-first .canvas-tools button{padding:3px}
+ .graph-first .tree-head{padding:12px 9px;font-size:8px}
+ .graph-first .tree-head span:last-child{display:none}
+ .bottom-drawer .table-tabs{gap:10px;padding:0 9px}
+ .bottom-drawer .drawer-toggle span{display:none}
+}
