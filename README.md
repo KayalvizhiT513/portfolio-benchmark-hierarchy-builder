@@ -101,12 +101,12 @@ In **Manual** or **Hybrid** mode select a *manually defined leaf* in the Node In
 The editor supports prototype-grade rule evaluation on browser-held data. For larger datasets, production use should add server-side validation, access-controlled dataset storage, and performance limits.
 
 
-## Eight-attribute, effective-dated sample (100 rows)
+## Eight-attribute, effective-dated sample (1,000 rows)
 
-Select **Data sources → Eight-attribute dated sample** to load 20 securities across these five dates:
+Select **Data sources → Eight-attribute dated sample** to load 200 securities across these five dates:
 `2026-01-31`, `2026-02-28`, `2026-03-31`, `2026-04-30`, and `2026-05-31`.
 
-The CSV is also committed at [sample-data/eight-attributes-100-rows.csv](sample-data/eight-attributes-100-rows.csv) for uploading or spreadsheet inspection.
+The CSV is also committed at [sample-data/eight-attributes-1000-rows.csv](sample-data/eight-attributes-1000-rows.csv) for uploading or spreadsheet inspection.
 
 ### Input schema
 
@@ -127,6 +127,6 @@ The CSV is also committed at [sample-data/eight-attributes-100-rows.csv](sample-
 
 **Eight attributes are eight classified levels beneath the visually separate root node.** In Hybrid mode the first four attributes are manually represented and the last four are generated from the data; in Automatic mode all eight attributes are derived from source rows.
 
-Each date has 20 positions. Several records change their `manager` or `desk` over the dates. For example, `SEC101` moves from **Desk North** in January to **Desk South** in February, then **Desk West** in March. Its `assetId` is unchanged. Select an effective date before inspecting or comparing the generated terminal nodes.
+Each date has 200 positions. The sample contains 1,000 total records. Several records change their `manager` or `desk` over the dates. For example, `SEC101` moves from **Desk North** in January to **Desk South** in February, then **Desk West** in March. Its `assetId` is unchanged. Select an effective date before inspecting or comparing the generated terminal nodes.
 
 Automatic classification requires non-empty values in **every selected hierarchy attribute on every input row**. Data with null or empty selected attributes must be fixed before auto-building; no placeholder leaf is generated.
