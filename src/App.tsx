@@ -42,8 +42,8 @@ const BENCH:RecordRow[]=[
 ["2026-02-01","IDX002","S&P Basket 2","Equity","US","Large Cap","Index",.30],
 ["2026-02-01","IDX003","S&P Basket 3","Equity","India","Large Cap","Index",.25]
 ].map(([date,assetId,assetName,assetClass,region,style,manager,weight])=>({date:String(date),assetId:String(assetId),assetName:String(assetName),assetClass:String(assetClass),region:String(region),style:String(style),manager:String(manager),weight:Number(weight)}));
-function initial(kind:Kind,mode:Mode):Config{
- const rows=enriched(kind==="Portfolio"?DATA:BENCH);
+function initial(kind:Kind,mode:Mode,sampleRows?:RecordRow[]):Config{
+ const rows=enriched(sampleRows??(kind==="Portfolio"?DATA:BENCH));
  const root:Node={id:"root",parent:null,name:kind,origin:mode==="Automatic"?"generated":"manual",independent:kind==="Benchmark"&&mode!=="Automatic",rule:kind==="Benchmark"?defaultRule():undefined};
  if(mode==="Automatic")return {nodes:[root],selected:"root",rows,dimensions:[...dims]};
  const nodes:Node[]=[root],known=new Set(["root"]);
@@ -163,7 +163,7 @@ export default function App(){
  if(lockedSource||lockedParent(id)||lockedParent(target)){notify("Group-by levels are locked. Change or remove the group-by rule before restructuring that branch.");return}if(descendants(nodes,id).includes(target)){notify("A node cannot be moved inside its own descendant.");return}commit(c=>({...c,nodes:c.nodes.map(x=>x.id===id?{...x,parent:target}:x)}));setExpanded(s=>new Set([...s,target]));notify("Moved "+n.name+" under "+to.name)}
  function duplicate(n:Node){if(n.origin!=="manual"){notify("Generated nodes cannot be duplicated.");return}const id=mkid();commit(c=>({...c,nodes:[...c.nodes,{...n,id,name:n.name+" copy"}],selected:id}));setSelection(id)}
  function toggle(id:string){setExpanded(s=>{const t=new Set(s);t.has(id)?t.delete(id):t.add(id);return t})}
- function loadSample(name:string){const picked=name==="benchmark"?BENCH:name==="eight"?eightAttributeSample:DATA;const next=initial(kind,mode);next.rows=enriched(picked);commit(()=>next);setSelection(next.selected);setDate(next.rows[0]?.date||"2026-01-01");setExpanded(new Set(next.nodes.map(n=>n.id)));notify("Loaded "+name+" sample dataset")}
+ function loadSample(name:string){const picked=name==="benchmark"?BENCH:name==="eight"?eightAttributeSample:DATA;const next=initial(kind,mode,picked);commit(()=>next);setSelection(next.selected);setDate(next.rows[0]?.date||"2026-01-01");setExpanded(new Set(next.nodes.map(n=>n.id)));notify("Loaded "+name+" sample dataset")}
  function exportConfig(){saveFile("report-chart-"+kind.toLowerCase()+"-"+mode.toLowerCase()+".json",JSON.stringify({kind,mode,date:effectiveDate,config},null,2))}
  async function databaseRequest(method:string,path:string,body?:unknown){
   let key=sessionStorage.getItem("report-chart-editor-key");
