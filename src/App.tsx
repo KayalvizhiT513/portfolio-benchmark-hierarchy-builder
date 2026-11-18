@@ -53,8 +53,9 @@ function initial(kind:Kind,mode:Mode):Config{
  return {nodes,selected:"root",rows,dimensions:[...dims]};
 }
 function generate(rows:RecordRow[],date:string,keys:string[],rootParent:string,scope?:string):Node[]{
- const subset=rows.filter(r=>r.date===date&&(!scope||r.region===scope));
- if(missingAttributes(subset as unknown as Array<{assetId:string;date:string;[key:string]:unknown}>,keys).length)return [];
+ const allEligible=rows.filter(r=>!scope||r.region===scope);
+ if(missingAttributes(allEligible as unknown as Array<{assetId:string;date:string;[key:string]:unknown}>,keys).length)return [];
+ const subset=allEligible.filter(r=>r.date===date);
  const result:Node[]=[];const ids=new Set<string>();
  subset.forEach(r=>{let parent=rootParent;keys.forEach((key,i)=>{const val=dimensionValue(r,key);const id=parent+"/"+key+":"+val;if(!ids.has(id)){result.push({id,parent,name:val,origin:"generated",scope:i===0&&key==="region"?val:undefined});ids.add(id)}parent=id})});
  return result;
@@ -133,7 +134,8 @@ export default function App(){
  if(total.length===0)issues.push("No holdings are available for this effective date.");
  const dup=new Set<string>();total.forEach(r=>{const k=r.assetId;if(dup.has(k))issues.push("Duplicate security at selected date: "+k);dup.add(k)});
  const missing=total.filter(r=>dimensions.some(k=>!String((r as unknown as Record<string,unknown>)[k]??"").trim()));
- if(missing.length)issues.push(missing.length+" records contain missing hierarchy labels. Automatic generation is blocked until all required attributes are populated.");
+ const allMissing=rows.filter(r=>dimensions.some(k=>!String((r as unknown as Record<string,unknown>)[k]??"").trim()));
+ if(allMissing.length)issues.push(allMissing.length+" records across the dataset contain missing hierarchy labels. Automatic generation is blocked until required attributes are populated.");
  const invalidGroup=manual.filter(n=>n.groupBy).flatMap(n=>missingAttributes(total as unknown as Array<{assetId:string;date:string;[key:string]:unknown}>,[n.groupBy!]));
  if(invalidGroup.length)issues.push("Group-by generation blocked: "+invalidGroup.length+" missing group-by attributes.");
  if(kind==="Portfolio"&&mode==="Manual"){const leaves=nodes.filter(n=>!nodes.some(c=>c.parent===n.id));const unassigned=total.filter(r=>!leaves.some(l=>previewRows(l,nodes,rows,effectiveDate,kind).some(s=>s.assetId===r.assetId)));if(unassigned.length)issues.push(unassigned.length+" positions are not assigned to a terminal manager node.")}
@@ -283,7 +285,7 @@ export default function App(){
  </>}
  <div className="assign-title">GROUP BY LEVEL</div>
  <p>Generate children from an attribute's distinct values. The generated branch is locked against drag-and-drop restructuring.</p>
- <select aria-label="Group by attribute" value={active.groupBy||""} onChange={e=>{const value=e.target.value;commit(c=>({...c,nodes:c.nodes.map(n=>n.id===active.id?{...n,groupBy:value||undefined}:n)}));setExpanded(x=>new Set([...x,active.id]))}}>
+ <select aria-label="Group by attribute" value={active.groupBy||""} onChange={e=>{const value=e.target.value;if(value&&manual.some(n=>n.parent===active.id)){notify("Group-by can only be added to a manual leaf. Move or delete its existing child nodes first.");return}commit(c=>({...c,nodes:c.nodes.map(n=>n.id===active.id?{...n,groupBy:value||undefined}:n)}));setExpanded(x=>new Set([...x,active.id]))}}>
  <option value="">No group-by level</option>{Object.keys(rows[0]||{}).filter(k=>!["date","weight","assetId","assetName"].includes(k)).map(k=><option key={k} value={k}>{labels[k]||k}</option>)}
  </select>
  </div>}
