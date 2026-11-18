@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: report-chart
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_DB_NAME
+        value: report_chart
+      - key: MONGODB_URI
+        sync: false
+      - key: REPORT_CHART_EDITOR_KEY
+        sync: false
