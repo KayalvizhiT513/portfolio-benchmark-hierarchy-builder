@@ -67,3 +67,24 @@ Dataset uploads and hierarchy edits are saved to the browser's local storage for
 - The demo CSV reader supports basic delimited rows but not quoted multiline CSV.
 - Node hierarchy editing works on manually defined nodes. Generated nodes derive from datasets.
 - Composite benchmark weighting, attribution calculations, and advanced validation are not yet implemented.
+
+## Deploy Report Chart on Render + MongoDB Atlas
+
+The Express backend and Vite frontend are served from a **single Render Web Service**, so no frontend CORS configuration is needed.
+
+1. On [MongoDB Atlas](https://cloud.mongodb.com/), open **Database Access** and create a database user with read/write permissions on the `report_chart` database (or reuse your appropriately scoped user).
+2. Under **Network Access**, permit the Render service's outbound IP ranges. Avoid `0.0.0.0/0` for production; allowing every IP increases the risk. Confirm Render's actual outbound addresses in its service networking information.
+3. On [Render](https://dashboard.render.com/), use **New > Blueprint**, connect `KayalvizhiT513/portfolio-benchmark-hierarchy-builder`, and select the branch containing `render.yaml` (merge this PR to main first for a normal production deployment).
+4. Render will create one Node Web Service using `npm install && npm run build` and `npm start`. Enter both secret values in Render, not GitHub:
+   - `MONGODB_URI`: complete Atlas URI with database username and URL-encoded password.
+   - `REPORT_CHART_EDITOR_KEY`: a separate, long, randomly generated secret used to protect report-chart API operations.
+5. `MONGODB_DB_NAME=report_chart` and `NODE_ENV=production` are provided automatically by `render.yaml`.
+6. Deploy and open `https://YOUR-SERVICE.onrender.com/api/health`. This checks the running server and reports whether MongoDB is configured (it does not guarantee that Atlas accepts connections).
+7. Open the service root URL, click **Save Report Chart**, and enter the editor key once per browser tab. Click **Open saved** to retrieve a saved graph and its dataset from MongoDB.
+
+Alternatively configure a standard **Web Service** directly with the same build/start commands and environment variables. Keep **Root Directory** blank when using the project root.
+
+**Security:** `REPORT_CHART_EDITOR_KEY` is a single-user shared secret, not a production multi-user authentication system. Anyone who knows it can read and change saved reports. Prefer real user authentication and ownership checks before allowing multiple users or confidential financial datasets. Neither MongoDB credentials nor the editor key should be embedded in Vite frontend environment variables.
+
+The browser's existing 24-hour local cache remains a temporary workspace, independent from report charts explicitly saved to MongoDB.
+
