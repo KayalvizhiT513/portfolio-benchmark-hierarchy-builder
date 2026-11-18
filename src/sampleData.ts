@@ -1,4 +1,4 @@
-// Deterministic synthetic data: 20 securities x 5 effective dates = 100 positions.
+// Deterministic synthetic data: 200 securities x 5 effective dates = 1,000 positions.
 // All eight classification attributes are populated. Desk changes across dates
 // for selected securities; a few also switch managers.
 export type EightAttributeRow={
@@ -18,15 +18,22 @@ const assets=[
  ["SEC117","ASML","Non-US","Technology"],["SEC118","Nestle","Non-US","Consumer"],
  ["SEC119","Novo Nordisk","Non-US","Healthcare"],["SEC120","Siemens","Non-US","Industrials"]
 ] as const;
+const extraAssets: Array<readonly [string,string,string,string]> = Array.from({length:180},(_,i)=>{
+ const regions=["US","India","Non-US"] as const;
+ const sectors=["Technology","Financials","Healthcare","Industrials","Consumer","Energy","Communication"] as const;
+ const j=i+121;
+ return ["SEC"+String(j),"Synthetic Security "+String(j),regions[i%regions.length],sectors[(i*3+Math.floor(i/regions.length))%sectors.length]];
+});
+const allAssets: Array<readonly [string,string,string,string]>=[...assets,...extraAssets];
 export const eightAttributeSample:EightAttributeRow[]=SAMPLE_DATES.flatMap((date,dateIndex)=>{
- const raw=assets.map((asset,i)=>{
+ const raw=allAssets.map((asset,i)=>{
   const [assetId,assetName,region,sector]=asset;
   const style=i%3===0?"Mid Cap":"Large Cap";
   const strategy=region==="India"?"India Focus":"Global Equity";
-  const fund=region==="India"?"India Leaders":region==="US"?"US Core":"International Core";
+  const fund=region==="India"?(i%2?"India Leaders":"India Opportunities"):region==="US"?(i%2?"US Core":"US Growth"):(i%2?"International Core":"International Value");
   const managerBase=region==="India"?"Cedar Capital":region==="US"?"Aster Capital":"Delta Partners";
-  const manager=i%5===0&&dateIndex>=2?"Beacon Management":managerBase;
-  const desk=(i%4===0?["Desk North","Desk South","Desk West","Desk North","Desk South"][dateIndex]:i%3===0?"Desk West":"Desk North");
+  const manager=i%5===0&&dateIndex>=2?"Beacon Management":i%11===0&&dateIndex>=3?"Horizon Partners":managerBase;
+  const desk=(i%4===0?["Desk North","Desk South","Desk West","Desk North","Desk South"][dateIndex]:i%3===0?["Desk West","Desk West","Desk North","Desk South","Desk West"][dateIndex]:"Desk North");
   const weightUnits=4+((i*7+dateIndex*3)%11);
   return {date,assetId,assetName,assetClass:"Equity",strategy,region,style,sector,fund,manager,desk,weightUnits};
  });
