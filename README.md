@@ -88,3 +88,15 @@ Alternatively configure a standard **Web Service** directly with the same build/
 
 The browser's existing 24-hour local cache remains a temporary workspace, independent from report charts explicitly saved to MongoDB.
 
+
+## Rule-based leaves and group-by levels
+
+In **Manual** or **Hybrid** mode select a *manually defined leaf* in the Node Inspector.
+
+- **Rule-based leaf:** Use the AND/OR rule editor, add nested groups, enable *Exclude matching (NOT)*, and list asset IDs to exclude. Securities matching the configured rule flow upward to their ancestors.
+- **Group-by level:** Choose an attribute from the Group by dropdown. Distinct values become generated child nodes. Such branches cannot be moved by drag-and-drop because the attribute is the source of truth. Their parents still aggregate the child positions.
+- **Automatic hierarchy:** generation is blocked if any row has null/empty values for the selected hierarchy dimensions. Check the Validation tab and fix source data rather than creating an "Unclassified" branch.
+- **Manual moves:** normal manual branches remain draggable. A branch that contains or lies under a group-by boundary is locked.
+
+The editor supports prototype-grade rule evaluation on browser-held data. For larger datasets, production use should add server-side validation, access-controlled dataset storage, and performance limits.
+
