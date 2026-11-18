@@ -1,0 +1,101 @@
+date,assetId,assetName,assetClass,strategy,region,style,sector,fund,manager,desk,weight
+2026-01-31,SEC101,Apple,Equity,Global Equity,US,Mid Cap,Technology,US Core,Aster Capital,Desk North,0.02247191
+2026-01-31,SEC102,Microsoft,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.06179775
+2026-01-31,SEC103,Nvidia,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.03932584
+2026-01-31,SEC104,Alphabet,Equity,Global Equity,US,Mid Cap,Communication,US Core,Aster Capital,Desk West,0.07865169
+2026-01-31,SEC105,Amazon,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk North,0.05617978
+2026-01-31,SEC106,Visa,Equity,Global Equity,US,Large Cap,Financials,US Core,Aster Capital,Desk North,0.03370787
+2026-01-31,SEC107,JPMorgan,Equity,Global Equity,US,Mid Cap,Financials,US Core,Aster Capital,Desk West,0.07303371
+2026-01-31,SEC108,Procter & Gamble,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk North,0.0505618
+2026-01-31,SEC109,Infosys,Equity,India Focus,India,Large Cap,Technology,India Leaders,Cedar Capital,Desk North,0.02808989
+2026-01-31,SEC110,TCS,Equity,India Focus,India,Mid Cap,Technology,India Leaders,Cedar Capital,Desk West,0.06741573
+2026-01-31,SEC111,HDFC Bank,Equity,India Focus,India,Large Cap,Financials,India Leaders,Cedar Capital,Desk North,0.04494382
+2026-01-31,SEC112,Reliance Industries,Equity,India Focus,India,Large Cap,Energy,India Leaders,Cedar Capital,Desk North,0.02247191
+2026-01-31,SEC113,ICICI Bank,Equity,India Focus,India,Mid Cap,Financials,India Leaders,Cedar Capital,Desk North,0.06179775
+2026-01-31,SEC114,Bharti Airtel,Equity,India Focus,India,Large Cap,Communication,India Leaders,Cedar Capital,Desk North,0.03932584
+2026-01-31,SEC115,Toyota,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.07865169
+2026-01-31,SEC116,SAP,Equity,Global Equity,Non-US,Mid Cap,Technology,International Core,Delta Partners,Desk West,0.05617978
+2026-01-31,SEC117,ASML,Equity,Global Equity,Non-US,Large Cap,Technology,International Core,Delta Partners,Desk North,0.03370787
+2026-01-31,SEC118,Nestle,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.07303371
+2026-01-31,SEC119,Novo Nordisk,Equity,Global Equity,Non-US,Mid Cap,Healthcare,International Core,Delta Partners,Desk West,0.0505618
+2026-01-31,SEC120,Siemens,Equity,Global Equity,Non-US,Large Cap,Industrials,International Core,Delta Partners,Desk North,0.02808989
+2026-02-28,SEC101,Apple,Equity,Global Equity,US,Mid Cap,Technology,US Core,Aster Capital,Desk South,0.03825137
+2026-02-28,SEC102,Microsoft,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.07650273
+2026-02-28,SEC103,Nvidia,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.05464481
+2026-02-28,SEC104,Alphabet,Equity,Global Equity,US,Mid Cap,Communication,US Core,Aster Capital,Desk West,0.03278689
+2026-02-28,SEC105,Amazon,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk South,0.07103825
+2026-02-28,SEC106,Visa,Equity,Global Equity,US,Large Cap,Financials,US Core,Aster Capital,Desk North,0.04918033
+2026-02-28,SEC107,JPMorgan,Equity,Global Equity,US,Mid Cap,Financials,US Core,Aster Capital,Desk West,0.0273224
+2026-02-28,SEC108,Procter & Gamble,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk North,0.06557377
+2026-02-28,SEC109,Infosys,Equity,India Focus,India,Large Cap,Technology,India Leaders,Cedar Capital,Desk South,0.04371585
+2026-02-28,SEC110,TCS,Equity,India Focus,India,Mid Cap,Technology,India Leaders,Cedar Capital,Desk West,0.02185792
+2026-02-28,SEC111,HDFC Bank,Equity,India Focus,India,Large Cap,Financials,India Leaders,Cedar Capital,Desk North,0.06010929
+2026-02-28,SEC112,Reliance Industries,Equity,India Focus,India,Large Cap,Energy,India Leaders,Cedar Capital,Desk North,0.03825137
+2026-02-28,SEC113,ICICI Bank,Equity,India Focus,India,Mid Cap,Financials,India Leaders,Cedar Capital,Desk South,0.07650273
+2026-02-28,SEC114,Bharti Airtel,Equity,India Focus,India,Large Cap,Communication,India Leaders,Cedar Capital,Desk North,0.05464481
+2026-02-28,SEC115,Toyota,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.03278689
+2026-02-28,SEC116,SAP,Equity,Global Equity,Non-US,Mid Cap,Technology,International Core,Delta Partners,Desk West,0.07103825
+2026-02-28,SEC117,ASML,Equity,Global Equity,Non-US,Large Cap,Technology,International Core,Delta Partners,Desk South,0.04918033
+2026-02-28,SEC118,Nestle,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.0273224
+2026-02-28,SEC119,Novo Nordisk,Equity,Global Equity,Non-US,Mid Cap,Healthcare,International Core,Delta Partners,Desk West,0.06557377
+2026-02-28,SEC120,Siemens,Equity,Global Equity,Non-US,Large Cap,Industrials,International Core,Delta Partners,Desk North,0.04371585
+2026-03-31,SEC101,Apple,Equity,Global Equity,US,Mid Cap,Technology,US Core,Beacon Management,Desk West,0.05649718
+2026-03-31,SEC102,Microsoft,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.03389831
+2026-03-31,SEC103,Nvidia,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.07344633
+2026-03-31,SEC104,Alphabet,Equity,Global Equity,US,Mid Cap,Communication,US Core,Aster Capital,Desk West,0.05084746
+2026-03-31,SEC105,Amazon,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk West,0.02824859
+2026-03-31,SEC106,Visa,Equity,Global Equity,US,Large Cap,Financials,US Core,Beacon Management,Desk North,0.06779661
+2026-03-31,SEC107,JPMorgan,Equity,Global Equity,US,Mid Cap,Financials,US Core,Aster Capital,Desk West,0.04519774
+2026-03-31,SEC108,Procter & Gamble,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk North,0.02259887
+2026-03-31,SEC109,Infosys,Equity,India Focus,India,Large Cap,Technology,India Leaders,Cedar Capital,Desk West,0.06214689
+2026-03-31,SEC110,TCS,Equity,India Focus,India,Mid Cap,Technology,India Leaders,Cedar Capital,Desk West,0.03954802
+2026-03-31,SEC111,HDFC Bank,Equity,India Focus,India,Large Cap,Financials,India Leaders,Beacon Management,Desk North,0.07909605
+2026-03-31,SEC112,Reliance Industries,Equity,India Focus,India,Large Cap,Energy,India Leaders,Cedar Capital,Desk North,0.05649718
+2026-03-31,SEC113,ICICI Bank,Equity,India Focus,India,Mid Cap,Financials,India Leaders,Cedar Capital,Desk West,0.03389831
+2026-03-31,SEC114,Bharti Airtel,Equity,India Focus,India,Large Cap,Communication,India Leaders,Cedar Capital,Desk North,0.07344633
+2026-03-31,SEC115,Toyota,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.05084746
+2026-03-31,SEC116,SAP,Equity,Global Equity,Non-US,Mid Cap,Technology,International Core,Beacon Management,Desk West,0.02824859
+2026-03-31,SEC117,ASML,Equity,Global Equity,Non-US,Large Cap,Technology,International Core,Delta Partners,Desk West,0.06779661
+2026-03-31,SEC118,Nestle,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.04519774
+2026-03-31,SEC119,Novo Nordisk,Equity,Global Equity,Non-US,Mid Cap,Healthcare,International Core,Delta Partners,Desk West,0.02259887
+2026-03-31,SEC120,Siemens,Equity,Global Equity,Non-US,Large Cap,Industrials,International Core,Delta Partners,Desk North,0.06214689
+2026-04-30,SEC101,Apple,Equity,Global Equity,US,Mid Cap,Technology,US Core,Beacon Management,Desk North,0.07142857
+2026-04-30,SEC102,Microsoft,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.04945055
+2026-04-30,SEC103,Nvidia,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.02747253
+2026-04-30,SEC104,Alphabet,Equity,Global Equity,US,Mid Cap,Communication,US Core,Aster Capital,Desk West,0.06593407
+2026-04-30,SEC105,Amazon,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk North,0.04395604
+2026-04-30,SEC106,Visa,Equity,Global Equity,US,Large Cap,Financials,US Core,Beacon Management,Desk North,0.02197802
+2026-04-30,SEC107,JPMorgan,Equity,Global Equity,US,Mid Cap,Financials,US Core,Aster Capital,Desk West,0.06043956
+2026-04-30,SEC108,Procter & Gamble,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk North,0.03846154
+2026-04-30,SEC109,Infosys,Equity,India Focus,India,Large Cap,Technology,India Leaders,Cedar Capital,Desk North,0.07692308
+2026-04-30,SEC110,TCS,Equity,India Focus,India,Mid Cap,Technology,India Leaders,Cedar Capital,Desk West,0.05494505
+2026-04-30,SEC111,HDFC Bank,Equity,India Focus,India,Large Cap,Financials,India Leaders,Beacon Management,Desk North,0.03296703
+2026-04-30,SEC112,Reliance Industries,Equity,India Focus,India,Large Cap,Energy,India Leaders,Cedar Capital,Desk North,0.07142857
+2026-04-30,SEC113,ICICI Bank,Equity,India Focus,India,Mid Cap,Financials,India Leaders,Cedar Capital,Desk North,0.04945055
+2026-04-30,SEC114,Bharti Airtel,Equity,India Focus,India,Large Cap,Communication,India Leaders,Cedar Capital,Desk North,0.02747253
+2026-04-30,SEC115,Toyota,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.06593407
+2026-04-30,SEC116,SAP,Equity,Global Equity,Non-US,Mid Cap,Technology,International Core,Beacon Management,Desk West,0.04395604
+2026-04-30,SEC117,ASML,Equity,Global Equity,Non-US,Large Cap,Technology,International Core,Delta Partners,Desk North,0.02197802
+2026-04-30,SEC118,Nestle,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.06043956
+2026-04-30,SEC119,Novo Nordisk,Equity,Global Equity,Non-US,Mid Cap,Healthcare,International Core,Delta Partners,Desk West,0.03846154
+2026-04-30,SEC120,Siemens,Equity,Global Equity,Non-US,Large Cap,Industrials,International Core,Delta Partners,Desk North,0.07692308
+2026-05-31,SEC101,Apple,Equity,Global Equity,US,Mid Cap,Technology,US Core,Beacon Management,Desk South,0.02840909
+2026-05-31,SEC102,Microsoft,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.06818182
+2026-05-31,SEC103,Nvidia,Equity,Global Equity,US,Large Cap,Technology,US Core,Aster Capital,Desk North,0.04545455
+2026-05-31,SEC104,Alphabet,Equity,Global Equity,US,Mid Cap,Communication,US Core,Aster Capital,Desk West,0.02272727
+2026-05-31,SEC105,Amazon,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk South,0.0625
+2026-05-31,SEC106,Visa,Equity,Global Equity,US,Large Cap,Financials,US Core,Beacon Management,Desk North,0.03977273
+2026-05-31,SEC107,JPMorgan,Equity,Global Equity,US,Mid Cap,Financials,US Core,Aster Capital,Desk West,0.07954545
+2026-05-31,SEC108,Procter & Gamble,Equity,Global Equity,US,Large Cap,Consumer,US Core,Aster Capital,Desk North,0.05681818
+2026-05-31,SEC109,Infosys,Equity,India Focus,India,Large Cap,Technology,India Leaders,Cedar Capital,Desk South,0.03409091
+2026-05-31,SEC110,TCS,Equity,India Focus,India,Mid Cap,Technology,India Leaders,Cedar Capital,Desk West,0.07386364
+2026-05-31,SEC111,HDFC Bank,Equity,India Focus,India,Large Cap,Financials,India Leaders,Beacon Management,Desk North,0.05113636
+2026-05-31,SEC112,Reliance Industries,Equity,India Focus,India,Large Cap,Energy,India Leaders,Cedar Capital,Desk North,0.02840909
+2026-05-31,SEC113,ICICI Bank,Equity,India Focus,India,Mid Cap,Financials,India Leaders,Cedar Capital,Desk South,0.06818182
+2026-05-31,SEC114,Bharti Airtel,Equity,India Focus,India,Large Cap,Communication,India Leaders,Cedar Capital,Desk North,0.04545455
+2026-05-31,SEC115,Toyota,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.02272727
+2026-05-31,SEC116,SAP,Equity,Global Equity,Non-US,Mid Cap,Technology,International Core,Beacon Management,Desk West,0.0625
+2026-05-31,SEC117,ASML,Equity,Global Equity,Non-US,Large Cap,Technology,International Core,Delta Partners,Desk South,0.03977273
+2026-05-31,SEC118,Nestle,Equity,Global Equity,Non-US,Large Cap,Consumer,International Core,Delta Partners,Desk North,0.07954545
+2026-05-31,SEC119,Novo Nordisk,Equity,Global Equity,Non-US,Mid Cap,Healthcare,International Core,Delta Partners,Desk West,0.05681818
+2026-05-31,SEC120,Siemens,Equity,Global Equity,Non-US,Large Cap,Industrials,International Core,Delta Partners,Desk North,0.03409091
