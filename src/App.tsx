@@ -187,10 +187,10 @@ export default function App(){
    notify("Loaded Report Chart: "+list[n-1].name);
   }catch(e){notify(e instanceof Error?e.message:"Could not load Report Chart")}
  }
- function fileUpload(file:File|null){if(!file)return;file.text().then(t=>{try{if(file.name.endsWith(".json")){const data=JSON.parse(t);if(data.config?.nodes&&data.config?.rows){commit(()=>data.config);setSelection(data.config.selected||"root");notify("Imported hierarchy configuration");return}if(Array.isArray(data)){commit(c=>({...c,rows:enriched(data)}));notify("Imported JSON dataset");return}throw Error("Unsupported JSON format")}const parsed=enriched(parseCsv(t));commit(c=>({...c,rows:parsed}));setDate(parsed[0].date);notify("Loaded "+parsed.length+" source rows")}catch(e){notify(e instanceof Error?e.message:"Could not read file")}})}
+ function fileUpload(file:File|null){if(!file)return;file.text().then(t=>{try{if(file.name.endsWith(".json")){const data=JSON.parse(t);if(data.config?.nodes&&data.config?.rows){commit(()=>data.config);setSelection(data.config.selected||"root");notify("Imported hierarchy configuration");return}if(Array.isArray(data)){commit(c=>({...c,rows:data}));notify("Imported JSON dataset");return}throw Error("Unsupported JSON format")}const parsed=parseCsv(t);commit(c=>({...c,rows:parsed}));setDate(parsed[0].date);notify("Loaded "+parsed.length+" source rows")}catch(e){notify(e instanceof Error?e.message:"Could not read file")}})}
  function renderRule(expr:RuleExpr,leaf:Node,root=true):React.ReactNode{
-  const change=(id:string,fn:(r:RuleExpr)=>RuleExpr)=>commit(c=>({...c,nodes:c.nodes.map(n=>n.id===leaf.id?{...n,selectionRule:updateRule(n.selectionRule||emptyRule(),id,fn)}:n)}));
-  const remove=(id:string)=>commit(c=>({...c,nodes:c.nodes.map(n=>n.id===leaf.id?{...n,selectionRule:deleteRule(n.selectionRule||emptyRule(),id)}:n)}));
+  const change=(id:string,fn:(r:RuleExpr)=>RuleExpr)=>commit(c=>({...c,nodes:c.nodes.map(n=>n.id===leaf.id?{...n,selectionRule:updateRule(n.selectionRule||{id:"rule:"+n.id,type:"group",join:"AND",negate:false,children:[]},id,fn)}:n)}));
+  const remove=(id:string)=>commit(c=>({...c,nodes:c.nodes.map(n=>n.id===leaf.id?{...n,selectionRule:deleteRule(n.selectionRule||{id:"rule:"+n.id,type:"group",join:"AND",negate:false,children:[]},id)}:n)}));
   if(expr.type==="condition")return <div className="condition-row" key={expr.id}>
     <select aria-label="Rule attribute" value={expr.field} onChange={e=>change(expr.id,r=>r.type==="condition"?{...r,field:e.target.value}:r)}>{[...new Set([...Object.keys(rows[0]||{}),...dimensions])].filter(k=>k!=="weight").map(k=><option key={k} value={k}>{labels[k]||k}</option>)}</select>
     <select aria-label="Rule operator" value={expr.op} onChange={e=>change(expr.id,r=>r.type==="condition"?{...r,op:e.target.value as typeof r.op}:r)}><option value="eq">Equals</option><option value="neq">Not equals</option><option value="contains">Contains</option><option value="in">In list</option></select>
@@ -278,7 +278,7 @@ export default function App(){
  <div className="assign-title">RULE-BASED LEAF SELECTION</div>
  <p>Build AND/OR groups, negate a group to exclude matching assets, or explicitly exclude asset IDs. Parent nodes roll up all matching leaf positions.</p>
  {nodes.every(n=>n.parent!==active.id)&&<>
- {renderRule(active.selectionRule||emptyRule(),active)}
+ {renderRule(active.selectionRule||{id:"rule:"+active.id,type:"group",join:"AND",negate:false,children:[]},active)}
  <label className="rule-exclusions">Exclude asset IDs (comma-separated)<input value={(active.excludedAssetIds||[]).join(", ")} placeholder="SEC001, SEC004" onChange={e=>commit(c=>({...c,nodes:c.nodes.map(n=>n.id===active.id?{...n,excludedAssetIds:e.target.value.split(",").map(x=>x.trim()).filter(Boolean)}:n)}))}/></label>
  </>}
  <div className="assign-title">GROUP BY LEVEL</div>
