@@ -144,7 +144,32 @@ export default function App(){
  function duplicate(n:Node){if(n.origin!=="manual"){notify("Generated nodes cannot be duplicated.");return}const id=mkid();commit(c=>({...c,nodes:[...c.nodes,{...n,id,name:n.name+" copy"}],selected:id}));setSelection(id)}
  function toggle(id:string){setExpanded(s=>{const t=new Set(s);t.has(id)?t.delete(id):t.add(id);return t})}
  function loadSample(name:string){const picked=name==="benchmark"?BENCH:DATA;const next=initial(kind,mode);next.rows=enriched(picked);commit(()=>next);setSelection(next.selected);setDate("2026-01-01");notify("Loaded "+name+" sample dataset")}
- function exportConfig(){saveFile("hierarchy-"+kind.toLowerCase()+"-"+mode.toLowerCase()+".json",JSON.stringify({kind,mode,date:effectiveDate,config},null,2))}
+ function exportConfig(){saveFile("report-chart-"+kind.toLowerCase()+"-"+mode.toLowerCase()+".json",JSON.stringify({kind,mode,date:effectiveDate,config},null,2))}
+ async function databaseRequest(method:string,path:string,body?:unknown){
+  let key=sessionStorage.getItem("report-chart-editor-key");
+  if(!key){key=window.prompt("Enter your Report Chart editor key (configured as REPORT_CHART_EDITOR_KEY on Render)")||"";if(!key)throw Error("An editor key is required");sessionStorage.setItem("report-chart-editor-key",key)}
+  const response=await fetch("/api/report-charts"+path,{method,headers:{"content-type":"application/json","x-report-chart-key":key},body:body?JSON.stringify(body):undefined});
+  if(!response.ok){if(response.status===401)sessionStorage.removeItem("report-chart-editor-key");const error=await response.json().catch(()=>({}));throw Error(error.error||"Database request failed")}
+  return response.status===204?null:response.json();
+ }
+ async function saveToDatabase(){
+  const name=window.prompt("Report Chart name",kind+" - "+mode+" - "+effectiveDate);
+  if(!name?.trim())return;
+  try{const saved=await databaseRequest("POST","",{name:name.trim(),kind,mode,config});notify("Saved Report Chart to MongoDB: "+saved.name)}catch(e){notify(e instanceof Error?e.message:"Could not save Report Chart")}
+ }
+ async function loadFromDatabase(){
+  try{const list=await databaseRequest("GET","") as Array<{id:string;name:string}>;
+   if(!list.length){notify("No saved Report Charts yet");return}
+   const options=list.map((item,i)=>(i+1)+". "+item.name).join("\\n");
+   const raw=window.prompt("Enter the number of the Report Chart to load:\\n"+options,"1");
+   if(!raw)return;const n=Number(raw);if(!Number.isInteger(n)||n<1||n>list.length){notify("Choose a valid number");return}
+   const stored=await databaseRequest("GET","/"+list[n-1].id) as {config:Config;kind:Kind;mode:Mode};
+   if(!stored.config?.nodes||!stored.config?.rows){notify("Saved report is invalid");return}
+   setConfigs(c=>({...c,[stored.kind+":"+stored.mode]:stored.config}));
+   setKind(stored.kind);setMode(stored.mode);setSelection(stored.config.selected||"root");
+   notify("Loaded Report Chart: "+list[n-1].name);
+  }catch(e){notify(e instanceof Error?e.message:"Could not load Report Chart")}
+ }
  function fileUpload(file:File|null){if(!file)return;file.text().then(t=>{try{if(file.name.endsWith(".json")){const data=JSON.parse(t);if(data.config?.nodes&&data.config?.rows){commit(()=>data.config);setSelection(data.config.selected||"root");notify("Imported hierarchy configuration");return}if(Array.isArray(data)){commit(c=>({...c,rows:enriched(data)}));notify("Imported JSON dataset");return}throw Error("Unsupported JSON format")}const parsed=enriched(parseCsv(t));commit(c=>({...c,rows:parsed}));setDate(parsed[0].date);notify("Loaded "+parsed.length+" source rows")}catch(e){notify(e instanceof Error?e.message:"Could not read file")}})}
  function row(n:Node):React.ReactNode{
   const children=nodes.filter(c=>c.parent===n.id);
@@ -175,7 +200,7 @@ export default function App(){
 }
  return <div className="app">
   <aside className="rail"><div className="mark"><GitBranch size={21}/></div><button className="rail-active" title="Hierarchy builder"><FolderTree size={20}/></button><button title="Dataset workspace" onClick={()=>setSide("Data")}><Database size={20}/></button><button title="Configuration" onClick={()=>setSide("Configure")}><Settings2 size={20}/></button><div className="rail-bottom"><div className="avatar">H</div></div></aside>
-  <div className="main"><header className="top"><div className="crumb">WORKSPACE <ChevronRight size={13}/> HIERARCHY STUDIO</div><div className="top-right"><span className="saved"><span/> Browser cache · 24 hours</span><button className="secondary" onClick={()=>document.getElementById("config-import")?.click()}><Upload size={15}/> Import</button><button className="primary" onClick={exportConfig}><ArrowDownToLine size={15}/> Export configuration</button><input id="config-import" type="file" accept=".csv,.json" hidden onChange={e=>fileUpload(e.target.files?.[0]||null)}/></div></header>
+  <div className="main"><header className="top"><div className="crumb">WORKSPACE <ChevronRight size={13}/> HIERARCHY STUDIO</div><div className="top-right"><button className="secondary" onClick={loadFromDatabase}><Database size={15}/> Open saved</button><button className="primary" onClick={saveToDatabase}><Database size={15}/> Save Report Chart</button><span className="saved"><span/> Browser cache · 24 hours</span><button className="secondary" onClick={()=>document.getElementById("config-import")?.click()}><Upload size={15}/> Import</button><button className="primary" onClick={exportConfig}><ArrowDownToLine size={15}/> Export configuration</button><input id="config-import" type="file" accept=".csv,.json" hidden onChange={e=>fileUpload(e.target.files?.[0]||null)}/></div></header>
   <main className="content"><div className="heading"><div><div className="eyebrow">PORTFOLIO CONSTRUCTION / STRUCTURE</div><h1>Hierarchy builder <span className="beta">BETA</span></h1><p>Design, organize and explore multi-level investment structures.</p></div><div className="top-actions"><button className="icon-button" title="Undo" onClick={undo} disabled={!history[key]?.past.length}><Undo2 size={17}/></button><button className="icon-button" title="Redo" onClick={redo} disabled={!history[key]?.future.length}><Redo2 size={17}/></button><button className="secondary" onClick={()=>{if(window.confirm("Reset this configuration?")){commit(()=>initial(kind,mode));setSelection("root")}}}><RotateCcw size={15}/> Reset</button></div></div>
    <section className="options"><div className="field"><label>STRUCTURE TYPE</label><div className="segmented">{(["Portfolio","Benchmark"] as Kind[]).map(k=><button key={k} className={kind===k?"on":""} onClick={()=>{setKind(k);setSelection("root")}}>{k}</button>)}</div></div><div className="field approach"><label>CONSTRUCTION APPROACH</label><div className="segmented">{(["Manual","Automatic","Hybrid"] as Mode[]).map(m=><button key={m} className={mode===m?"on":""} onClick={()=>{setMode(m);setSelection("root")}}>{m}</button>)}</div></div><div className="field date-field"><label>EFFECTIVE DATE</label><select value={effectiveDate} onChange={e=>setDate(e.target.value)}>{dates.map(d=><option key={d}>{d}</option>)}</select></div></section>
    <div className="retention-note"><span><Database size={17}/> Temporary browser storage: your imported data and edits expire 24 hours after they were first saved. Export to your device to keep a permanent copy. Browser cleanup may remove them sooner.</span><button onClick={exportConfig}><ArrowDownToLine size={15}/> Export to my device</button></div>
