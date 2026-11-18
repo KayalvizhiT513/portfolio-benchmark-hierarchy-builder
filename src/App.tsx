@@ -1,11 +1,12 @@
 import React, {useEffect,useMemo,useState} from "react";
+import {RuleExpr,condition,emptyRule,updateRule,deleteRule,matches,missingAttributes} from "./rules";
 import {Activity,ArrowDownToLine,ArrowUpRight,Check,ChevronDown,ChevronRight,Copy,Database,FolderTree,GitBranch,GripVertical,Layers3,LayoutGrid,Plus,RotateCcw,Search,Settings2,Trash2,Undo2,Redo2,Upload, X} from "lucide-react";
 
 type Kind="Portfolio"|"Benchmark";
 type Mode="Manual"|"Automatic"|"Hybrid";
 type RecordRow={date:string;assetId:string;assetName:string;assetClass:string;strategy?:string;region:string;style:string;sector?:string;fund?:string;manager:string;weight:number;source?:string};
 type BenchmarkRule={method:"equal"|"source"|"custom";region:string;style:string;selectedAssetIds:string[];weights:Record<string,number>};
-type Node={id:string;parent:string|null;name:string;origin:"manual"|"generated";independent?:boolean;scope?:string;assignedAssetIds?:string[];filters?:Record<string,string>;rule?:BenchmarkRule};
+type Node={id:string;parent:string|null;name:string;origin:"manual"|"generated";independent?:boolean;scope?:string;assignedAssetIds?:string[];filters?:Record<string,string>;rule?:BenchmarkRule;selectionRule?:RuleExpr;excludedAssetIds?:string[];groupBy?:string};
 type Config={nodes:Node[];selected:string;dimensions:string[];rows:RecordRow[]};
 const dims=["assetClass","strategy","region","style","sector","fund","manager"] as const;
 const labels:Record<string,string>={assetClass:"Asset class",strategy:"Investment strategy",region:"Region",style:"Investment style",sector:"Sector",fund:"Fund",manager:"Manager"};
@@ -53,6 +54,7 @@ function initial(kind:Kind,mode:Mode):Config{
 }
 function generate(rows:RecordRow[],date:string,keys:string[],rootParent:string,scope?:string):Node[]{
  const subset=rows.filter(r=>r.date===date&&(!scope||r.region===scope));
+ if(missingAttributes(subset as unknown as Array<{assetId:string;date:string;[key:string]:unknown}>,keys).length)return [];
  const result:Node[]=[];const ids=new Set<string>();
  subset.forEach(r=>{let parent=rootParent;keys.forEach((key,i)=>{const val=dimensionValue(r,key);const id=parent+"/"+key+":"+val;if(!ids.has(id)){result.push({id,parent,name:val,origin:"generated",scope:i===0&&key==="region"?val:undefined});ids.add(id)}parent=id})});
  return result;
@@ -71,6 +73,7 @@ function previewRows(node:Node,nodes:Node[],rows:RecordRow[],date:string,kind:Ki
  const totalWeight=positions.reduce((sum,r)=>sum+r.weight,0);
  return positions.map(r=>({...r,weight:rule.method==="custom"?(rule.weights[r.assetId]||0)/100:rule.method==="equal"?(positions.length?1/positions.length:0):(totalWeight?r.weight/totalWeight:0)}));
 }
+ if(node.selectionRule)return subset.filter(r=>matches(r as unknown as {assetId:string;date:string;[key:string]:unknown},node.selectionRule,node.excludedAssetIds||[]));
  const chain:Node[]=[];let current:Node|undefined=node;
  while(current){chain.unshift(current);current=nodes.find(n=>n.id===current?.parent)}
  let filtered=subset;
@@ -83,7 +86,7 @@ function previewRows(node:Node,nodes:Node[],rows:RecordRow[],date:string,kind:Ki
  if(node.origin==="manual"&&node.assignedAssetIds)filtered=filtered.filter(r=>node.assignedAssetIds!.includes(r.assetId));
  else if(node.origin==="manual"&&node.name.startsWith("Manager "))filtered=filtered.filter(r=>r.manager===node.name);
  else if(node.origin==="manual"&&node.id!=="root"&&!node.filters&&node.scope===undefined)filtered=[];
- return filtered;
+ return filtered.filter(r=>!(node.excludedAssetIds||[]).includes(r.assetId));
 }
 function csv(rows:RecordRow[]){const cols=["date","assetId","assetName","assetClass","strategy","region","style","sector","fund","manager","weight"];return [cols.join(","),...rows.map(r=>cols.map(c=>JSON.stringify((r as unknown as Record<string,unknown>)[c]??"")).join(","))].join("\n")}
 function saveFile(name:string,text:string,type="application/json"){const a=document.createElement("a");const url=URL.createObjectURL(new Blob([text],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
@@ -109,10 +112,19 @@ export default function App(){
  const {nodes:manual,rows,dimensions}=config;
  const dates=[...new Set(rows.map(r=>r.date))].sort();
  const effectiveDate=dates.includes(date)?date:dates[0]||date;
- const generated=useMemo(()=>mode==="Automatic"?generate(rows,effectiveDate,dimensions,"root"):mode==="Hybrid"?manual.filter(n=>n.origin==="manual"&&n.filters&&Object.keys(n.filters).length===3).flatMap(n=>{
- const subset=rows.filter(r=>Object.entries(n.filters!).every(([key,value])=>dimensionValue(r,key)===value));
- return generate(subset,effectiveDate,dimensions.slice(3,7),n.id);
-}):[],[mode,manual,rows,effectiveDate,dimensions]);
+ const generated=useMemo(()=>{
+ const base=mode==="Automatic"?generate(rows,effectiveDate,dimensions,"root"):mode==="Hybrid"?manual.filter(n=>n.origin==="manual"&&n.filters&&Object.keys(n.filters).length===3).flatMap(n=>{
+  const subset=rows.filter(r=>Object.entries(n.filters!).every(([key,value])=>dimensionValue(r,key)===value));
+  return generate(subset,effectiveDate,dimensions.slice(3,7),n.id);
+ }):[];
+ const grouped=manual.filter(n=>n.origin==="manual"&&n.groupBy).flatMap(n=>{
+  const subset=rows.filter(r=>Object.entries(n.filters||{}).every(([key,value])=>dimensionValue(r,key)===value));
+  const invalid=missingAttributes(subset as unknown as Array<{assetId:string;date:string;[key:string]:unknown}>,[n.groupBy!]);
+  if(invalid.length)return [];
+  return generate(subset,effectiveDate,[n.groupBy!],n.id);
+ });
+ return [...base,...grouped];
+},[mode,manual,rows,effectiveDate,dimensions]);
  const nodes=mode==="Automatic"?[...manual.filter(n=>n.id==="root"),...generated]:[...manual.filter(n=>n.origin==="manual"),...generated];
  const active=nodes.find(n=>n.id===selection)||nodes.find(n=>n.id===config.selected)||nodes[0];
  const holdings=active?previewRows(active,nodes,rows,effectiveDate,kind):[];
@@ -121,7 +133,9 @@ export default function App(){
  if(total.length===0)issues.push("No holdings are available for this effective date.");
  const dup=new Set<string>();total.forEach(r=>{const k=r.assetId;if(dup.has(k))issues.push("Duplicate security at selected date: "+k);dup.add(k)});
  const missing=total.filter(r=>dimensions.some(k=>!String((r as unknown as Record<string,unknown>)[k]??"").trim()));
- if(missing.length)issues.push(missing.length+" records contain missing hierarchy labels.");
+ if(missing.length)issues.push(missing.length+" records contain missing hierarchy labels. Automatic generation is blocked until all required attributes are populated.");
+ const invalidGroup=manual.filter(n=>n.groupBy).flatMap(n=>missingAttributes(total as unknown as Array<{assetId:string;date:string;[key:string]:unknown}>,[n.groupBy!]));
+ if(invalidGroup.length)issues.push("Group-by generation blocked: "+invalidGroup.length+" missing group-by attributes.");
  if(kind==="Portfolio"&&mode==="Manual"){const leaves=nodes.filter(n=>!nodes.some(c=>c.parent===n.id));const unassigned=total.filter(r=>!leaves.some(l=>previewRows(l,nodes,rows,effectiveDate,kind).some(s=>s.assetId===r.assetId)));if(unassigned.length)issues.push(unassigned.length+" positions are not assigned to a terminal manager node.")}
  if(kind==="Benchmark"){
  nodes.filter(n=>n.independent).forEach(n=>{
@@ -140,7 +154,10 @@ export default function App(){
  if(mode==="Hybrid"&&parent&&Object.keys(nodes.find(n=>n.id===parent)?.filters||{}).length>=3){notify("Levels 5–8 are generated from source data.");return}const name=window.prompt("Name the new node","New category");if(!name?.trim())return;const id=mkid();commit(c=>({...c,nodes:[...c.nodes,{id,parent,name:name.trim(),origin:"manual"}],selected:id}));setSelection(id);setExpanded(s=>new Set([...s,parent||"root",id]))}
  function rename(n:Node){if(n.origin==="generated"){notify("Generated labels come from the dataset. Edit the source data or dimension mapping.");return}const name=window.prompt("Rename node",n.name);if(!name?.trim())return;commit(c=>({...c,nodes:c.nodes.map(x=>x.id===n.id?{...x,name:name.trim()}:x)}))}
  function remove(n:Node){if(n.id==="root")return;const all=descendants(nodes,n.id);const promote=window.confirm("Delete "+n.name+"?\nOK: promote direct children to this node's parent.\nCancel: abort deletion.");if(!promote)return;commit(c=>({...c,nodes:c.nodes.filter(x=>x.id!==n.id).map(x=>x.parent===n.id?{...x,parent:n.parent}:x),selected:n.parent||"root"}));setSelection(n.parent||"root")}
- function move(id:string,target:string){if(id===target||id==="root")return;const n=nodes.find(x=>x.id===id),to=nodes.find(x=>x.id===target);if(!n||!to)return;if(n.origin==="generated"||to.origin==="generated"){notify("Generated nodes are recreated from source data. Edit a manual node instead.");return}if(descendants(nodes,id).includes(target)){notify("A node cannot be moved inside its own descendant.");return}commit(c=>({...c,nodes:c.nodes.map(x=>x.id===id?{...x,parent:target}:x)}));setExpanded(s=>new Set([...s,target]));notify("Moved "+n.name+" under "+to.name)}
+ function move(id:string,target:string){if(id===target||id==="root")return;const n=nodes.find(x=>x.id===id),to=nodes.find(x=>x.id===target);if(!n||!to)return;if(n.origin==="generated"||to.origin==="generated"){notify("Generated nodes are rebuilt from source data. They cannot be moved manually.");return}
+ const lockedSource=descendants(nodes,id).some(childId=>!!nodes.find(x=>x.id===childId)?.groupBy);
+ const lockedParent=(startId:string)=>{let at=nodes.find(x=>x.id===startId);const seen=new Set<string>();while(at&&!seen.has(at.id)){if(at.groupBy)return true;seen.add(at.id);at=nodes.find(x=>x.id===at!.parent)}return false};
+ if(lockedSource||lockedParent(id)||lockedParent(target)){notify("Group-by levels are locked. Change or remove the group-by rule before restructuring that branch.");return}if(descendants(nodes,id).includes(target)){notify("A node cannot be moved inside its own descendant.");return}commit(c=>({...c,nodes:c.nodes.map(x=>x.id===id?{...x,parent:target}:x)}));setExpanded(s=>new Set([...s,target]));notify("Moved "+n.name+" under "+to.name)}
  function duplicate(n:Node){if(n.origin!=="manual"){notify("Generated nodes cannot be duplicated.");return}const id=mkid();commit(c=>({...c,nodes:[...c.nodes,{...n,id,name:n.name+" copy"}],selected:id}));setSelection(id)}
  function toggle(id:string){setExpanded(s=>{const t=new Set(s);t.has(id)?t.delete(id):t.add(id);return t})}
  function loadSample(name:string){const picked=name==="benchmark"?BENCH:DATA;const next=initial(kind,mode);next.rows=enriched(picked);commit(()=>next);setSelection(next.selected);setDate("2026-01-01");notify("Loaded "+name+" sample dataset")}
@@ -171,6 +188,24 @@ export default function App(){
   }catch(e){notify(e instanceof Error?e.message:"Could not load Report Chart")}
  }
  function fileUpload(file:File|null){if(!file)return;file.text().then(t=>{try{if(file.name.endsWith(".json")){const data=JSON.parse(t);if(data.config?.nodes&&data.config?.rows){commit(()=>data.config);setSelection(data.config.selected||"root");notify("Imported hierarchy configuration");return}if(Array.isArray(data)){commit(c=>({...c,rows:enriched(data)}));notify("Imported JSON dataset");return}throw Error("Unsupported JSON format")}const parsed=enriched(parseCsv(t));commit(c=>({...c,rows:parsed}));setDate(parsed[0].date);notify("Loaded "+parsed.length+" source rows")}catch(e){notify(e instanceof Error?e.message:"Could not read file")}})}
+ function renderRule(expr:RuleExpr,leaf:Node,root=true):React.ReactNode{
+  const change=(id:string,fn:(r:RuleExpr)=>RuleExpr)=>commit(c=>({...c,nodes:c.nodes.map(n=>n.id===leaf.id?{...n,selectionRule:updateRule(n.selectionRule||emptyRule(),id,fn)}:n)}));
+  const remove=(id:string)=>commit(c=>({...c,nodes:c.nodes.map(n=>n.id===leaf.id?{...n,selectionRule:deleteRule(n.selectionRule||emptyRule(),id)}:n)}));
+  if(expr.type==="condition")return <div className="condition-row" key={expr.id}>
+    <select aria-label="Rule attribute" value={expr.field} onChange={e=>change(expr.id,r=>r.type==="condition"?{...r,field:e.target.value}:r)}>{[...new Set([...Object.keys(rows[0]||{}),...dimensions])].filter(k=>k!=="weight").map(k=><option key={k} value={k}>{labels[k]||k}</option>)}</select>
+    <select aria-label="Rule operator" value={expr.op} onChange={e=>change(expr.id,r=>r.type==="condition"?{...r,op:e.target.value as typeof r.op}:r)}><option value="eq">Equals</option><option value="neq">Not equals</option><option value="contains">Contains</option><option value="in">In list</option></select>
+    <input aria-label="Rule value" value={expr.value} onChange={e=>change(expr.id,r=>r.type==="condition"?{...r,value:e.target.value}:r)} placeholder="Value (comma list for In)"/>
+    <button title="Remove condition" onClick={()=>remove(expr.id)}><X size={14}/></button>
+  </div>;
+  return <div className="rule-group" key={expr.id}><div className="rule-group-head">
+   <select aria-label="Match conditions" value={expr.join} onChange={e=>change(expr.id,r=>r.type==="group"?{...r,join:e.target.value as "AND"|"OR"}:r)}><option value="AND">Match ALL (AND)</option><option value="OR">Match ANY (OR)</option></select>
+   <label><input type="checkbox" checked={expr.negate} onChange={e=>change(expr.id,r=>r.type==="group"?{...r,negate:e.target.checked}:r)}/> Exclude matching (NOT)</label>
+   {!root&&<button title="Remove group" onClick={()=>remove(expr.id)}><Trash2 size={14}/></button>}
+  </div>
+   {expr.children.map(child=>renderRule(child,leaf,false))}
+   <div className="rule-controls"><button onClick={()=>change(expr.id,r=>r.type==="group"?{...r,children:[...r.children,condition()]}:r)}><Plus size={14}/> Condition</button><button onClick={()=>change(expr.id,r=>r.type==="group"?{...r,children:[...r.children,emptyRule()]}:r)}><Plus size={14}/> Nested group</button></div>
+  </div>;
+ }
  function row(n:Node):React.ReactNode{
   const children=nodes.filter(c=>c.parent===n.id);
   const isOpen=expanded.has(n.id);
@@ -238,6 +273,19 @@ export default function App(){
  {(active.rule||defaultRule()).method==="custom"&&<input type="number" min="0" max="100" step="0.1" title="Weight in percentage points" value={(active.rule||defaultRule()).weights[r.assetId]??0} onChange={e=>{const weight=Number(e.target.value);commit(c=>({...c,nodes:c.nodes.map(n=>n.id===active.id?{...n,rule:{...(n.rule||defaultRule()),weights:{...(n.rule||defaultRule()).weights,[r.assetId]:Number.isFinite(weight)?weight:0}}}:n)}))}}/>}
  </div>)}</div>
  <div className="rule-hint">Custom weights must sum to 100% for the effective date. Weights and filters are exported with the configuration.</div>
+ </div>}
+ {active.origin==="manual"&&active.id!=="root"&&<div className="rule-editor">
+ <div className="assign-title">RULE-BASED LEAF SELECTION</div>
+ <p>Build AND/OR groups, negate a group to exclude matching assets, or explicitly exclude asset IDs. Parent nodes roll up all matching leaf positions.</p>
+ {nodes.every(n=>n.parent!==active.id)&&<>
+ {renderRule(active.selectionRule||emptyRule(),active)}
+ <label className="rule-exclusions">Exclude asset IDs (comma-separated)<input value={(active.excludedAssetIds||[]).join(", ")} placeholder="SEC001, SEC004" onChange={e=>commit(c=>({...c,nodes:c.nodes.map(n=>n.id===active.id?{...n,excludedAssetIds:e.target.value.split(",").map(x=>x.trim()).filter(Boolean)}:n)}))}/></label>
+ </>}
+ <div className="assign-title">GROUP BY LEVEL</div>
+ <p>Generate children from an attribute's distinct values. The generated branch is locked against drag-and-drop restructuring.</p>
+ <select aria-label="Group by attribute" value={active.groupBy||""} onChange={e=>{const value=e.target.value;commit(c=>({...c,nodes:c.nodes.map(n=>n.id===active.id?{...n,groupBy:value||undefined}:n)}));setExpanded(x=>new Set([...x,active.id]))}}>
+ <option value="">No group-by level</option>{Object.keys(rows[0]||{}).filter(k=>!["date","weight","assetId","assetName"].includes(k)).map(k=><option key={k} value={k}>{labels[k]||k}</option>)}
+ </select>
  </div>}
  <div className="inspector-buttons"><button onClick={()=>add(active.id)} disabled={mode==="Automatic"||active.origin==="generated"||(mode==="Hybrid"&&Object.keys(active.filters||{}).length>=3)}><Plus size={15}/> Child</button><button onClick={()=>rename(active)} disabled={active.origin==="generated"}>Rename</button><button title="Duplicate" onClick={()=>duplicate(active)} disabled={active.origin==="generated"}><Copy size={15}/></button><button title="Delete" onClick={()=>remove(active)} disabled={active.id==="root"||active.origin==="generated"}><Trash2 size={15}/></button></div>{kind==="Benchmark"&&active.origin==="manual"&&<label className="benchmark-option"><input type="checkbox" checked={!!active.independent} onChange={e=>commit(c=>({...c,nodes:c.nodes.map(n=>n.id===active.id?{...n,independent:e.target.checked,rule:n.rule||defaultRule()}:n)}))}/> Independent benchmark definition</label>}<div className="inspector-foot"><b>About this node</b><p>{active.independent?"This benchmark's constituents are independently defined and need not match its children.":active.origin==="generated"?"Created from distinct combinations of labeled source records.":"This node is editable. Drag it onto another manual node to change its parent."}</p></div></>}</section></div></div></div>
    <section className={"table-panel bottom-drawer "+(bottomOpen?"open":"collapsed")}><div className="table-tabs"><button className="drawer-toggle" aria-expanded={bottomOpen} title={bottomOpen?"Close details drawer":"Open details drawer"} onClick={()=>setBottomOpen(v=>!v)}>{bottomOpen?<ChevronDown size={17}/>:<ChevronRight size={17}/>} <span>{bottomOpen?"Hide details":"Show details"}</span></button>{(["Holdings","Source data","Validation"] as const).map(t=><button key={t} className={tab===t?"active":""} onClick={()=>{setTab(t);setBottomOpen(true)}}>{t}{t==="Validation"&&<span className="issue-count">{issues.length}</span>}</button>)}</div><div className="bottom-content"><div className="table-info"><div><b>{tab==="Holdings"?"Underlying positions":tab==="Source data"?"Source data records":"Data quality & validation"}</b><span>{tab==="Holdings"?active?.name:tab==="Source data"?"All effective dates":"Current configuration"}</span></div><div className="table-actions"><Search size={16}/><input placeholder="Filter securities..." value={search} onChange={e=>setSearch(e.target.value)}/><button onClick={()=>saveFile(tab==="Source data"?"source.csv":"holdings.csv",csv(tab==="Source data"?rows:holdings),"text/csv")}><ArrowDownToLine size={15}/></button></div></div>{tab==="Validation"?<div className="validation">{issues.length?issues.map((s,i)=><div className="warning" key={i}><Activity size={16}/>{s}</div>):<div className="clean"><Check size={18}/> No validation issues found for this view.</div>}</div>:<div className="table-overflow"><table><thead><tr><th>EFFECTIVE DATE</th><th>SECURITY ID</th><th>SECURITY NAME</th><th>REGION</th><th>STYLE</th><th>MANAGER</th><th className="right">WEIGHT</th></tr></thead><tbody>{(tab==="Source data"?rows:holdings).filter(r=>JSON.stringify(r).toLowerCase().includes(search.toLowerCase())).map((r,i)=><tr key={r.date+r.assetId+i}><td>{r.date}</td><td><code>{r.assetId}</code></td><td><b>{r.assetName}</b></td><td>{r.region}</td><td>{r.style}</td><td>{r.manager}</td><td className="right">{fmt(r.weight)}</td></tr>)}</tbody></table></div>}</div></section>
